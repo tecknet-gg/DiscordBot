@@ -1,5 +1,9 @@
+from random import random
+
 import praw
 import requests
+import json
+import random
 
 def requestHandler(url, headers=None):
     try:
@@ -45,3 +49,51 @@ def getDad():
     joke = joke["joke"]
     return joke
 
+def getRedditLongJoke():
+    reddit = initialiseReddit()
+
+    subreddit = reddit.subreddit("Jokes")
+    posts = list(subreddit.new(limit=250))
+    filtered = [post for post in posts
+                if not post.stickied and (post.selftext or post.title)]
+    joke = random.choice(filtered)
+    jokeTitle = joke.title
+    jokeText = joke.selftext
+    joke = f"{jokeTitle} {jokeText}"
+    print(joke)
+    print(len(joke))
+    if len(joke) <= 150:
+        getRedditLongJoke()
+    else:
+        return joke
+
+def getRedditJoke(subreddit):
+    reddit = initialiseReddit()
+
+    subreddit = reddit.subreddit(subreddit)
+    posts = list(subreddit.new(limit=250))
+    filtered = [post for post in posts
+                if not post.stickied and (post.selftext or post.title)]
+    joke = random.choice(filtered)
+    jokeTitle = joke.title
+    jokeText = joke.selftext
+    joke = f"{jokeTitle} {jokeText}"
+    print(joke)
+    #logic to check usage and prevent repeats (within last 1000)
+    #call cache manager to prune size
+    return joke
+
+def initialiseReddit():
+    with open("apitokens.json", "r") as tokens:
+        data = json.load(tokens)
+
+    reddit = praw.Reddit(
+        client_id = data["client_id"],
+        client_secret = data["client_secret"],
+        user_agent = data["user_agent"]
+    )
+    return reddit
+
+
+getRedditJoke("dadjokes")
+getRedditLongJoke()

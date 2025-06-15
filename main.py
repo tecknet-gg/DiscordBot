@@ -23,3 +23,4 @@ async def sendMessage(message, type, ctx):
 async def roast(ctx, target: discord.Member):
     roast = generateRoast(ctx.author)
     await sendMessage(roast, "roast", ctx)
+
